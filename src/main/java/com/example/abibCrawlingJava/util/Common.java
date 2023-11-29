@@ -95,7 +95,7 @@ public class Common {
         //"/uploadc/contents/image/OL/A000000166675.png"
 
         try{
-            URL url = new URL("http:"+ productDTO.getImg2());
+            URL url = new URL("http:"+ productDTO.getImgPath());
             InputStream inputStream = url.openStream();
 
             Path path = Paths.get(fileDirectory);

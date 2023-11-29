@@ -31,7 +31,9 @@ public class ProductService {
     @Transactional
     public String processProducts(List<ProductDTO> productDTOList, int productCount) {
         for(ProductDTO productDTO : productDTOList){
+            System.out.println("1");
             try {
+                System.out.println("2");
                 ccTempProductService.insertIntoTempProduct(productDTO.getProdCode(), productDTO.getSiteType()); // cc 템플릿에 저장
 
                 Product foundProduct = ccProductRepository.findByComplexAttributes(
@@ -48,30 +50,39 @@ public class ProductService {
                 LocalDateTime now = LocalDateTime.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss");
                 String formattedDateTime = now.format(formatter);
-
+                System.out.println("3");
                 if (productCount == 0 || foundProduct == null) { // siteType 확인, DB 저장된 값 확인
+                    System.out.println("4");
                     if (Integer.parseInt(productDTO.getPrice()) > 0) {
+                        System.out.println("5");
                         String filePath = common.downloadImage(productDTO); // 이미지 다운로드
                         productDTO.setImg(filePath); // 이미지 경로 저장
-                        ccProductRepository.save(productDTO.toEntity()); // 값 DB에 저장
+                        System.out.println("6");
+                        Product product = ccProductRepository.save(productDTO.toEntity()); // 값 DB에 저장
+                        System.out.println("7");
                         ProductHistory productHistory = new ProductHistory();
+                        System.out.println("8");
                         productHistory.setHistoryNo(productDTO.getSiteType() + formattedDateTime + randomNumber);
-
+                        System.out.println("9");
                         //TODO: 이부분도 toEntity로 해도 되는지 확인 필요
-                        productHistory.setProductNo(productDTO.toEntity()); // 물품 가격 변동 확인을 위해 product를 받아서 넣음
+                        productHistory.setProductNo(product); // 물품 가격 변동 확인을 위해 product를 받아서 넣음
 
                         productHistory.setSiteType(productDTO.getSiteType());
                         productHistory.setProdCode(productDTO.getProdCode());
                         productHistory.setPrice(Integer.parseInt(productDTO.getPrice()));
-
+                        System.out.println("10");
                         //제품 이력 저장
                         ccProductHistoryRepository.save(productHistory);
+                        System.out.println("11");
                         log.info("새 제품이 추가되었습니다");
                     }
+                    System.out.println("6");
                     continue;
+
                 }
 //                 들어온 값과 DB의 Img값이 다를 경우
                 if (!foundProduct.getImg().equals(productDTO.getImg())) {
+
                     String filePath = common.downloadImage(productDTO);
                     productDTO.setImg(filePath);
                     ccProductRepository.save(productDTO.toEntity()); //DB에 다시 저장
@@ -79,15 +90,19 @@ public class ProductService {
                 } else if (!foundProduct.getProdName().equals(productDTO.getProdName()) ||
                         !foundProduct.getBrand().equals(productDTO.getBrand())) {
                     ccProductRepository.save(productDTO.toEntity());
+
                     // getSoldOut 이 null 값이여서 equals로 비교시 에러
                 } else if( foundProduct.getSoldOut() != productDTO.getSoldOut()){ // 품절, 입고시
                     ccProductRepository.save(productDTO.toEntity());
+
                 }  else {
+
                     // 가격 변경시
                     if (foundProduct.getPrice() != Integer.parseInt(productDTO.getPrice())) {
+
                         ProductHistory productHistory = new ProductHistory();
                         productHistory.setHistoryNo(productDTO.getSiteType() + formattedDateTime + randomNumber);
-                        productHistory.setProductNo(productDTO.toEntity());
+                        productHistory.setProductNo(foundProduct);
                         productHistory.setSiteType(productDTO.getSiteType());
                         productHistory.setProdCode(productDTO.getProdCode());
                         productHistory.setPrice(Integer.parseInt(productDTO.getPrice()));
@@ -95,7 +110,9 @@ public class ProductService {
                         if (productDTO.getSiteType().equals("CL") && productDTO.getSoldOut().equals("일시품절")) {
                             productDTO.setPrice(String.valueOf(foundProduct.getPrice()));
                             productHistory.setPrice(foundProduct.getPrice());
+
                         }
+
 
                         //제품 이력 저장
                         ccProductHistoryRepository.save(productHistory);
