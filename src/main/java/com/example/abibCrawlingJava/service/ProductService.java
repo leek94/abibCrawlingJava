@@ -1,5 +1,6 @@
 package com.example.abibCrawlingJava.service;
 
+import com.example.abibCrawlingJava.dto.ProductDTO;
 import com.example.abibCrawlingJava.entiey.CcTempProduct;
 import com.example.abibCrawlingJava.entiey.Product;
 import com.example.abibCrawlingJava.entiey.ProductHistory;
@@ -24,23 +25,21 @@ public class ProductService {
 
     private final CcTempProductService ccTempProductService;
     private final CcProductRepository ccProductRepository;
-    private final CcTempProductRepository ccTempProductRepository;
     private final CcProductHistoryRepository ccProductHistoryRepository;
     private final Common common;
 
     @Transactional
-    public String processProducts(List<Product> productList, int productCount) {
-        for(Product product : productList){
+    public String processProducts(List<ProductDTO> productDTOList, int productCount) {
+        for(ProductDTO productDTO : productDTOList){
             try {
-                System.out.println("1");
-                ccTempProductService.insertIntoTempProduct(product.getProdCode(), product.getSiteType()); // cc 템플릿에 저장
+                ccTempProductService.insertIntoTempProduct(productDTO.getProdCode(), productDTO.getSiteType()); // cc 템플릿에 저장
 
                 Product foundProduct = ccProductRepository.findByComplexAttributes(
-                        product.getProdCode(),
-                        product.getSiteType(),
-                        product.getSiteDepth1(),
-                        product.getSiteDepth2(),
-                        product.getSiteDepth3()
+                        productDTO.getProdCode(),
+                        productDTO.getSiteType(),
+                        productDTO.getSiteDepth1(),
+                        productDTO.getSiteDepth2(),
+                        productDTO.getSiteDepth3()
                 );
                 long randomNum = (long) (Math.random() * (10000000000L - 1000000000L) + 1000000000L);
                 String randomNumber = Long.toString(randomNum);
@@ -50,61 +49,57 @@ public class ProductService {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss");
                 String formattedDateTime = now.format(formatter);
 
-                System.out.println("2");
                 if (productCount == 0 || foundProduct == null) { // siteType 확인, DB 저장된 값 확인
-                    System.out.println("3");
-                    if (product.getPrice() > 0) {
-                        System.out.println("4");
-                        String filePath = common.downloadImage(product); // 이미지 다운로드
-                        System.out.println("5");
-                        product.setImg(filePath); // 이미지 경로 저장
-                        System.out.println("6");
-                        ccProductRepository.save(product); // 값 DB에 저장
-                        System.out.println("7");
+                    if (Integer.parseInt(productDTO.getPrice()) > 0) {
+                        String filePath = common.downloadImage(productDTO); // 이미지 다운로드
+                        productDTO.setImg(filePath); // 이미지 경로 저장
+                        ccProductRepository.save(productDTO.toEntity()); // 값 DB에 저장
                         ProductHistory productHistory = new ProductHistory();
-                        productHistory.setHistoryNo(product.getSiteType() + formattedDateTime + randomNumber);
-                        productHistory.setProductNo(product); // 물품 가격 변동 확인을 위해 product를 받아서 넣음
-                        productHistory.setSiteType(product.getSiteType());
-                        productHistory.setProdCode(product.getProdCode());
-                        productHistory.setPrice(product.getPrice());
+                        productHistory.setHistoryNo(productDTO.getSiteType() + formattedDateTime + randomNumber);
+
+                        //TODO: 이부분도 toEntity로 해도 되는지 확인 필요
+                        productHistory.setProductNo(productDTO.toEntity()); // 물품 가격 변동 확인을 위해 product를 받아서 넣음
+
+                        productHistory.setSiteType(productDTO.getSiteType());
+                        productHistory.setProdCode(productDTO.getProdCode());
+                        productHistory.setPrice(Integer.parseInt(productDTO.getPrice()));
 
                         //제품 이력 저장
                         ccProductHistoryRepository.save(productHistory);
                         log.info("새 제품이 추가되었습니다");
                     }
-                    System.out.println("10");
                     continue;
                 }
 //                 들어온 값과 DB의 Img값이 다를 경우
-                if (!foundProduct.getImg().equals(product.getImg())) {
-                    String filePath = common.downloadImage(product);
-                    product.setImg(filePath);
-                    ccProductRepository.save(product); //DB에 다시 저장
+                if (!foundProduct.getImg().equals(productDTO.getImg())) {
+                    String filePath = common.downloadImage(productDTO);
+                    productDTO.setImg(filePath);
+                    ccProductRepository.save(productDTO.toEntity()); //DB에 다시 저장
                     // 제품 이름, 브랜드 변경시
-                } else if (!foundProduct.getProdName().equals(product.getProdName()) ||
-                        !foundProduct.getBrand().equals(product.getBrand())) {
-                    ccProductRepository.save(product);
+                } else if (!foundProduct.getProdName().equals(productDTO.getProdName()) ||
+                        !foundProduct.getBrand().equals(productDTO.getBrand())) {
+                    ccProductRepository.save(productDTO.toEntity());
                     // getSoldOut 이 null 값이여서 equals로 비교시 에러
-                } else if( foundProduct.getSoldOut() != product.getSoldOut()){ // 품절, 입고시
-                    ccProductRepository.save(product);
+                } else if( foundProduct.getSoldOut() != productDTO.getSoldOut()){ // 품절, 입고시
+                    ccProductRepository.save(productDTO.toEntity());
                 }  else {
                     // 가격 변경시
-                    if (foundProduct.getPrice() != (product.getPrice())) {
+                    if (foundProduct.getPrice() != Integer.parseInt(productDTO.getPrice())) {
                         ProductHistory productHistory = new ProductHistory();
-                        productHistory.setHistoryNo(product.getSiteType() + formattedDateTime + randomNumber);
-                        productHistory.setProductNo(product);
-                        productHistory.setSiteType(product.getSiteType());
-                        productHistory.setProdCode(product.getProdCode());
-                        productHistory.setPrice(product.getPrice());
+                        productHistory.setHistoryNo(productDTO.getSiteType() + formattedDateTime + randomNumber);
+                        productHistory.setProductNo(productDTO.toEntity());
+                        productHistory.setSiteType(productDTO.getSiteType());
+                        productHistory.setProdCode(productDTO.getProdCode());
+                        productHistory.setPrice(Integer.parseInt(productDTO.getPrice()));
 
-                        if (product.getSiteType().equals("CL") && product.getSoldOut().equals("일시품절")) {
-                            product.setPrice(foundProduct.getPrice());
+                        if (productDTO.getSiteType().equals("CL") && productDTO.getSoldOut().equals("일시품절")) {
+                            productDTO.setPrice(String.valueOf(foundProduct.getPrice()));
                             productHistory.setPrice(foundProduct.getPrice());
                         }
 
                         //제품 이력 저장
                         ccProductHistoryRepository.save(productHistory);
-                        ccProductRepository.save(product);
+                        ccProductRepository.save(productDTO.toEntity());
                     }
                 }
 

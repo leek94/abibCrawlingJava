@@ -1,5 +1,6 @@
 package com.example.abibCrawlingJava.service;
 
+import com.example.abibCrawlingJava.dto.ProductDTO;
 import com.example.abibCrawlingJava.entiey.Category;
 import com.example.abibCrawlingJava.entiey.Product;
 import com.example.abibCrawlingJava.repository.CcProductHistoryRepository;
@@ -73,7 +74,7 @@ public class Crawling {
 
 
          List<Category> categoryList = new ArrayList<>();
-         List<Product> productList = new ArrayList<>();
+         List<ProductDTO> productDTOList = new ArrayList<>();
 
          int prodCount = productService.countBySiteType(siteType); // 값이 있으면 1, 없으면 0 반환
 
@@ -134,13 +135,13 @@ public class Crawling {
 
                String infoCoupang = "https://link.coupang.com/a/3IhPI";
 
-               Product product = new Product(null, "/uploadc/contents/image/" + siteType + "/" + prodCode + ".png","", info
-               , prodName, prodCode, Integer.parseInt(price), Integer.parseInt(bePrice), sale
-               ,soldOut, siteDepth1, siteDepth2, siteDepth3, siteType, brand, infoCoupang);
+               ProductDTO productDTO = new ProductDTO(null, img,"/uploadc/contents/image/" + siteType + "/" + prodCode + ".png","", info
+               , infoCoupang, prodName, prodCode, price, bePrice, sale
+               ,soldOut, siteDepth1, siteDepth2, siteDepth3, siteType,brand);
 
-               productList.add(product);
-               productService.processProducts(productList, prodCount);
-               productList.clear();
+               productDTOList.add(productDTO);
+               productService.processProducts(productDTOList, prodCount);
+               productDTOList.clear();
             }
          }
 

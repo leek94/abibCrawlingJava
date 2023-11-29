@@ -1,5 +1,6 @@
 package com.example.abibCrawlingJava.util;
 
+import com.example.abibCrawlingJava.dto.ProductDTO;
 import com.example.abibCrawlingJava.entiey.Product;
 import com.example.abibCrawlingJava.repository.CcProductRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -86,15 +87,15 @@ public class Common {
                 .orElse("0");
     }
 
-    public String downloadImage(Product product) {
-        String fileDirectory = IMAGE_DIRECTORY + product.getSiteType() + "/";
+    public String downloadImage(ProductDTO productDTO) {
+        String fileDirectory = IMAGE_DIRECTORY + productDTO.getSiteType() + "/";
         //"/uploadc/contents/image/OL/"
 //        String fileDirectory = "C:\\Users\\Focus\\image\\OL\\";
-        String filePath = fileDirectory + product.getProdCode() + ".png";
+        String filePath = fileDirectory + productDTO.getProdCode() + ".png";
         //"/uploadc/contents/image/OL/A000000166675.png"
 
         try{
-            URL url = new URL("http:"+ product.getImg2());
+            URL url = new URL("http:"+ productDTO.getImg2());
             InputStream inputStream = url.openStream();
 
             Path path = Paths.get(fileDirectory);
