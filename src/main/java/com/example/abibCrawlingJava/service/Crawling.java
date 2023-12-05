@@ -146,6 +146,7 @@ public class Crawling {
          }
 
       } catch (IOException e) {
+         log.info("예외 발생 Cralwing : " + e.getMessage());
          e.printStackTrace();
       }
    }

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomTasklet implements Tasklet, StepExecutionListener {
 
-    private final Crawling crawling;
+private final Crawling crawling;
 
     @Override
     @BeforeStep
@@ -31,15 +31,17 @@ public class CustomTasklet implements Tasklet, StepExecutionListener {
     @AfterStep
     public ExitStatus afterStep(StepExecution stepExecution) {
         log.info("======================= Crawling 완료 =======================");
-
         return ExitStatus.COMPLETED;
     }
 
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-
-        crawling.runCrawling();
-
-        return RepeatStatus.FINISHED;
+        try {
+            crawling.runCrawling();
+            return RepeatStatus.FINISHED;
+        } catch (Exception e) {
+            log.error("CustomTasklet - Error occurred: " + e.getMessage());
+            return RepeatStatus.CONTINUABLE; // 예외 발생 시 CONTINUABLE 상태 반환
+        }
     }
 }

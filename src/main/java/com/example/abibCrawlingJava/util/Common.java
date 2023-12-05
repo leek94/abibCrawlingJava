@@ -44,7 +44,13 @@ public class Common {
     @Value("${spring.datasource.password}")
     private  String password;
 
-    String siteType = "OL";
+    @Value("${spring.email.email}")
+    private String email;
+
+    @Value("${spring.email.emailPW}")
+    private String emailPW;
+
+    String siteType = "AI";
 
 
     public static final String WEB_DRIVER_ID = "webdriver.chrome.driver"; // 드라이버 ID
@@ -135,22 +141,22 @@ public class Common {
             properties.put("mail.smtp.port", "587");
 
             // 계정 정보 설정
-            String username = "solutionfocus@naver.com";
-            String password = "!solfocus0515";
+//            String username = "solutionfocus@naver.com";
+//            String password = "!solfocus0515";
 
             // 메일 수신자 설정
-            String receiver = "jh@solutionfocus.co.kr";
+            String receiver = "khlee@solutionfocus.co.kr";
 
             //메일 세션 생성
             Session session = Session.getDefaultInstance(properties, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(username, password);
+                    return new PasswordAuthentication(email, emailPW);
                 }
             });
 
             //메시지 생성
             Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(username));
+            msg.setFrom(new InternetAddress(email));
             msg.setRecipient(Message.RecipientType.TO, new InternetAddress((receiver)));
             msg.setSubject(title);
             msg.setText(content);
@@ -168,10 +174,9 @@ public class Common {
         String url = "https://www.oliveyoung.co.kr/store/main/main.do?oy=0";
     }
 
-    //    public static WebDriver startCrawling(String siteType , String url, String name, String password){
     public WebDriver startCrawling(String siteType) {
 
-        WebDriverManager.chromedriver().setup(); // 드라이버 최신 버전 자동 업데이트
+//        WebDriverManager.chromedriver().setup(); // 드라이버 최신 버전 자동 업데이트 ->
 
         // Chrome WebDriver 설정
         System.setProperty(WEB_DRIVER_ID, WEB_DRIVER_PATH); //서버에서는 위치를 환경변수나 경로를 서버에 맞게 지정해줘야함
@@ -180,7 +185,7 @@ public class Common {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");
-        options.addArguments("--remote-allow-origins=*"); // 403 에러 해결을 위해 필요
+        options.addArguments("--remote-allow-origins=*"); // 403 에러 해결을 위해 필요한 코드
 
         WebDriver driver = new ChromeDriver(options);
 
