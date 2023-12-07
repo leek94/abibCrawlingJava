@@ -53,6 +53,7 @@ public class ProductService {
                     if (Integer.parseInt(productDTO.getPrice()) > 0) {
                         String filePath = common.downloadImage(productDTO); // 이미지 다운로드
                         productDTO.setImg(filePath); // 이미지 경로 저장
+
                         Product savedproduct = ccProductRepository.save(productDTO.toEntity()); // 값 DB에 저장
 
                         ProductHistory productHistory = new ProductHistory();
@@ -69,30 +70,36 @@ public class ProductService {
 
 
                 }
-                // 변경시 @Transactional을 달아서 더티 체킹으로 처리
+                // 변경시 @Transactional을 달아서 더티 체킹으로 업데이트
 
                  //들어온 값과 DB의 Img값이 다를 경우
                 if (!foundProduct.getImg().equals(productDTO.getImg())) {
                     String filePath = common.downloadImage(productDTO);
                     foundProduct.setImg(filePath);
+                }
 
-                    // 제품 이름 변경시
-                } else if (!foundProduct.getProdName().equals(productDTO.getProdName())) {
+                // 제품 이름 변경시 업데이트
+                if (!foundProduct.getProdName().equals(productDTO.getProdName())) {
                     foundProduct.setProdName(productDTO.getProdName());
+                }
 
-                    // 제품 브랜드 변경시
-                } else if(!foundProduct.getBrand().equals(productDTO.getBrand())){
+                // 제품 브랜드 변경시 업데이트
+                if(!foundProduct.getBrand().equals(productDTO.getBrand())){
                     foundProduct.setBrand(productDTO.getBrand());
+                }
 
-                    // 품절, 입고시
-                } else if( foundProduct.getSoldOut() != productDTO.getSoldOut()) { // getSoldOut 이 null 값일 경우 equals로 비교시 에러
+                // 품절, 입고시 업데이트
+                if( foundProduct.getSoldOut() != productDTO.getSoldOut()) { // getSoldOut 이 null 값일 경우 equals로 비교시 에러
                     foundProduct.setSoldOut(productDTO.getSoldOut());
+                }
 
-                    // 원 가격 변경시
-                } else if(foundProduct.getBePrice() != Integer.parseInt(productDTO.getBePrice())){
+                // 원 가격 변경시 업데이트
+                if(foundProduct.getBePrice() != Integer.parseInt(productDTO.getBePrice())){
                     foundProduct.setBePrice(Integer.parseInt(productDTO.getBePrice()));
+                }
 
-                } else if(foundProduct.getPrice() != Integer.parseInt(productDTO.getPrice())) {
+                // 가격 변동시 이력 저장 및 가격 업데이트
+                if(foundProduct.getPrice() != Integer.parseInt(productDTO.getPrice())) {
 
                         ProductHistory productHistory = new ProductHistory();
                         productHistory.setHistoryNo(productDTO.getSiteType() + formattedDateTime + randomNumber);
