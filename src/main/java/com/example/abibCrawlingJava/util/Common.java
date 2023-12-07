@@ -101,7 +101,7 @@ public class Common {
         //"/uploadc/contents/image/OL/A000000166675.png"
 
         try{
-            URL url = new URL("http:"+ productDTO.getImgPath());
+            URL url = new URL(productDTO.getImgPath());
             InputStream inputStream = url.openStream();
 
             Path path = Paths.get(fileDirectory);
@@ -140,9 +140,7 @@ public class Common {
             properties.put("mail.smtp.auth", "true");
             properties.put("mail.smtp.port", "587");
 
-            // 계정 정보 설정
-//            String username = "solutionfocus@naver.com";
-//            String password = "!solfocus0515";
+            // 계정 정보 설정 -> 외부 파일 설정으로 대체
 
             // 메일 수신자 설정
             String receiver = "khlee@solutionfocus.co.kr";

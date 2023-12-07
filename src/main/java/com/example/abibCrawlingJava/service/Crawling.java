@@ -135,9 +135,9 @@ public class Crawling {
 
                String infoCoupang = "https://link.coupang.com/a/3IhPI";
 
-               ProductDTO productDTO = new ProductDTO(null, img,"/uploadc/contents/image/" + siteType + "/" + prodCode + ".png","", info
+               ProductDTO productDTO = new ProductDTO(null,"http:" +img,"/uploadc/contents/image/" + siteType + "/" + prodCode + ".png","", info
                , infoCoupang, prodName, prodCode, price, bePrice, sale
-               ,soldOut, siteDepth1, siteDepth2, siteDepth3, siteType,brand);
+               ,soldOut, siteDepth1, siteDepth2, siteDepth3, siteType, brand);
 
                productDTOList.add(productDTO);
                productService.processProducts(productDTOList, prodCount);
