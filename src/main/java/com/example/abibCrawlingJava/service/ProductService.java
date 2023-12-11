@@ -72,7 +72,7 @@ public class ProductService {
                 }
                 // 변경시 @Transactional을 달아서 더티 체킹으로 업데이트
 
-                 //들어온 값과 DB의 Img값이 다를 경우
+                //들어온 값과 DB의 Img값이 다를 경우
                 if (!foundProduct.getImg().equals(productDTO.getImg())) {
                     String filePath = common.downloadImage(productDTO);
                     foundProduct.setImg(filePath);
