@@ -25,9 +25,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter:2.5.5' // 스프링 부트 버전 업데이트
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 
-	implementation 'mysql:mysql-connector-java'
+	implementation 'mysql:mysql-connector-java' // 개발 환경에서 사용할 DB (Mysql)
 
-	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.h2database:h2' // 테스트 코드 작성시 사용할 DB (H2)
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
