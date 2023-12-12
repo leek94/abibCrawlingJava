@@ -2,12 +2,14 @@ package com.example.abibCrawlingJava.dto;
 
 import com.example.abibCrawlingJava.entiey.Product;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class ProductDTO {
 
     private Long id;

@@ -126,7 +126,7 @@ public class ProductService {
             }
 
         } // for문 안에서 돌고 있어서 try catch에 잡혀도 에러 메세지 띄우고 다음 내용 진행됨
-        return "끝남";
+        return "전체 갯수: "+ productDTOList.size();
     }
 
     @Transactional
