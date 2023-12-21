@@ -17,6 +17,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -34,7 +35,7 @@ public class ProductService {
             try {
                 ccTempProductService.insertIntoTempProduct(productDTO.getProdCode(), productDTO.getSiteType()); // cc 템플릿에 저장
 
-                Product foundProduct = ccProductRepository.findByComplexAttributes(
+                Optional<Product> foundProductOP = ccProductRepository.findByComplexAttributes(
                         productDTO.getProdCode(),
                         productDTO.getSiteType(),
                         productDTO.getSiteDepth1(),
@@ -48,7 +49,7 @@ public class ProductService {
                 LocalDateTime now = LocalDateTime.now();
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss");
                 String formattedDateTime = now.format(formatter);
-                if (productCount == 0 || foundProduct == null) { // siteType 확인, DB 저장된 값 확인
+                if (productCount == 0 || foundProductOP == null) { // siteType 확인, DB 저장된 값 확인
 
                     if (Integer.parseInt(productDTO.getPrice()) > 0) {
                         String filePath = common.downloadImage(productDTO); // 이미지 다운로드
@@ -68,55 +69,54 @@ public class ProductService {
                     }
                     continue;
 
-
                 }
                 // 변경시 @Transactional을 달아서 더티 체킹으로 업데이트
 
                 //들어온 값과 DB의 Img값이 다를 경우
-                if (!foundProduct.getImg().equals(productDTO.getImg())) {
+                if (!foundProductOP.get().getImg().equals(productDTO.getImg())) {
                     String filePath = common.downloadImage(productDTO);
-                    foundProduct.setImg(filePath);
+                    foundProductOP.get().setImg(filePath);
                 }
 
                 // 제품 이름 변경시 업데이트
-                if (!foundProduct.getProdName().equals(productDTO.getProdName())) {
-                    foundProduct.setProdName(productDTO.getProdName());
+                if (!foundProductOP.get().getProdName().equals(productDTO.getProdName())) {
+                    foundProductOP.get().setProdName(productDTO.getProdName());
                 }
 
                 // 제품 브랜드 변경시 업데이트
-                if(!foundProduct.getBrand().equals(productDTO.getBrand())){
-                    foundProduct.setBrand(productDTO.getBrand());
+                if(!foundProductOP.get().getBrand().equals(productDTO.getBrand())){
+                    foundProductOP.get().setBrand(productDTO.getBrand());
                 }
 
                 // 품절, 입고시 업데이트
-                if( foundProduct.getSoldOut() != productDTO.getSoldOut()) { // getSoldOut 이 null 값일 경우 equals로 비교시 에러
-                    foundProduct.setSoldOut(productDTO.getSoldOut());
+                if( foundProductOP.get().getSoldOut() != productDTO.getSoldOut()) { // getSoldOut 이 null 값일 경우 equals로 비교시 에러
+                    foundProductOP.get().setSoldOut(productDTO.getSoldOut());
                 }
 
                 // 원 가격 변경시 업데이트
-                if(foundProduct.getBePrice() != Integer.parseInt(productDTO.getBePrice())){
-                    foundProduct.setBePrice(Integer.parseInt(productDTO.getBePrice()));
+                if(foundProductOP.get().getBePrice() != Integer.parseInt(productDTO.getBePrice())){
+                    foundProductOP.get().setBePrice(Integer.parseInt(productDTO.getBePrice()));
                 }
 
                 // 가격 변동시 이력 저장 및 가격 업데이트
-                if(foundProduct.getPrice() != Integer.parseInt(productDTO.getPrice())) {
+                if(foundProductOP.get().getPrice() != Integer.parseInt(productDTO.getPrice())) {
 
                         ProductHistory productHistory = new ProductHistory();
                         productHistory.setHistoryNo(productDTO.getSiteType() + formattedDateTime + randomNumber);
-                        productHistory.setProductNo(foundProduct);
+                        productHistory.setProductNo(foundProductOP.get());
                         productHistory.setSiteType(productDTO.getSiteType());
                         productHistory.setProdCode(productDTO.getProdCode());
                         productHistory.setPrice(Integer.parseInt(productDTO.getPrice()));
 
                         if (productDTO.getSiteType().equals("CL") && productDTO.getSoldOut().equals("일시품절")) {
-                            productDTO.setPrice(String.valueOf(foundProduct.getPrice())); // String 타입으로 변환
-                            productHistory.setPrice(foundProduct.getPrice());
+                            productDTO.setPrice(String.valueOf(foundProductOP.get().getPrice())); // String 타입으로 변환
+                            productHistory.setPrice(foundProductOP.get().getPrice());
                         }
 
                         // 제품 이력 저장
                         ccProductHistoryRepository.save(productHistory);
 
-                        foundProduct.setPrice(Integer.parseInt(productDTO.getPrice()));
+                        foundProductOP.get().setPrice(Integer.parseInt(productDTO.getPrice()));
                     }
 
             }catch (DataIntegrityViolationException e) {

@@ -1,0 +1,39 @@
+#spring:
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/testcrawling?useSSL=false&serverTimezone=UTC
+#    username: root
+#    password: leek0929
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#      properties:
+#        hibernate:
+#          dialect: org.hibernate.dialect.MySQL8Dialect # MySQL 버전에 따라 적절한 Dialect 사용
+#          temp.use_jdbc_metadata_defaults: false
+#          hbm2ddl.auto: update
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/testcrawling
+    username: root
+    password: leek0929
+  jpa:
+    hibernate:
+      ddl-auto: update
+      dialect: org.hibernate.dialect.MySQL8Dialect
+  h2:
+    console:
+      enabled: true
+  profiles:
+    active: test
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#      properties:
+#        hibernate:
+#          dialect: org.hibernate.dialect.H2Dialect # H2 데이터베이스에 맞는 Dialect 사용
+#          temp.use_jdbc_metadata_defaults: false
+#          hbm2ddl.auto: update

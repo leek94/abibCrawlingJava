@@ -16,6 +16,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,13 +97,76 @@ class ProductServiceTest {
         String hh = productService.processProducts(productDTOList, 1);
         // then
         assertThat(hh).isEqualTo("전체 갯수: 2");
+
     }
+
+    @Test
+    @DisplayName("중복 생성 확인 테스트")
+    void doubleMakedProduct(){
+        Product product1 = Product.builder()
+                .img("image")
+                .img2(" ")
+                .info("/p/s/e/d")
+                .prodName("잘 팔리는 제품")
+                .prodCode("12345")
+                .price(36000)
+                .bePrice(45000)
+                .sale(0.8)
+                .soldOut("")
+                .siteDepth1("화장품")
+                .siteDepth2("남성")
+                .siteDepth3("*")
+                .siteType("BB")
+                .brand("잘팔아")
+                .infoCoupang("c/o/u")
+                .build();
+
+        Product product2 = Product.builder()
+                .img("image")
+                .img2(" ")
+                .info("/p/s/e/d")
+                .prodName("잘 팔리는 제품")
+                .prodCode("12345")
+                .price(36000)
+                .bePrice(45000)
+                .sale(0.8)
+                .soldOut("")
+                .siteDepth1("화장품")
+                .siteDepth2("남성")
+                .siteDepth3("*")
+                .siteType("BB")
+                .brand("잘팔아")
+                .infoCoupang("c/o/u")
+                .build();
+
+        ReflectionTestUtils.setField(product1, "id", 1L);
+        ReflectionTestUtils.setField(product2, "id", 2L);
+
+        Optional<Product> productOP1 = Optional.of(product1);
+        Optional<Product> productOP2 = Optional.of(product2);
+
+        Mockito.when(ccProductRepository.save(product1)).thenReturn(product1);
+        Mockito.when(ccProductRepository.save(product2)).thenReturn(product2);
+
+        Mockito.when(ccProductRepository.findByComplexAttributes(product1.getProdCode(),product1.getSiteType()
+                ,product1.getSiteDepth1(), product1.getSiteDepth2(), product1.getSiteDepth3())).thenReturn(productOP1);
+
+        Mockito.when(ccProductRepository.findByComplexAttributes(product2.getProdCode(),product2.getSiteType()
+                ,product2.getSiteDepth1(), product2.getSiteDepth2(), product2.getSiteDepth3())).thenReturn(productOP2);
+
+        Optional<Product> saved = ccProductRepository.findByComplexAttributes("12345","BB","화장품","남성","*");
+
+        assertThat(saved).isEqualTo(product1);
+
+    }
+
     // proudctList를 DTOList로 변환하는 메서드
     private List<ProductDTO> convertToProductDTOList(List<Product> productList){
         return productList.stream()
                 .map(this::convertToProductDTO)
                 .collect(Collectors.toList());
     }
+
 
     // product를 DTO로 변환하는 메서드
     private ProductDTO convertToProductDTO(Product product) {

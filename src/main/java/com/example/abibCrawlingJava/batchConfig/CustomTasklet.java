@@ -33,7 +33,8 @@ private final Crawling crawling;
         log.info("======================= Crawling 완료 =======================");
         return ExitStatus.COMPLETED;
     }
-
+    // 배치에 등록해놓고 컨트롤러로 테스트시 에러가 나는 경우가 있음 --> 컨트롤러용 서비스를 따로 만들어서 테스트를 하든지
+    // 스케줄링 시간을 맞춰서 테스트를 진행해야 여러개 등록 에러가 없음(DB에서 Product 찾을때 2개의 값이 찾아지는 에러)
     @Override
     public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
         try {
